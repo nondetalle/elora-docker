@@ -4,7 +4,7 @@ This is a traffic emulator for the [Chirpstack server stack](https://www.chirpst
 
 This software can be used to simulate in real-time multiple devices and gateways sharing a radio channel with very high flexibility in terms of possible configurations. LoRaWAN traffic is then UDP-encapsulated by gateways and forwarded outside the simulation. If a Chirpstack network server is in place, it will think the traffic is coming from a real network. All Class A MAC primitives used in the UE868 region are supported: radio transmission parameters of simulated devices can be changed by the downlink LoRaWAN traffic of the real server.
 
-In this repository we provide a quick installation using Docker Compose. If you are interested to the emulation internal working and developement we refer you to the [emulator code repository](https://github.com/nondetalle/elora).
+In this repository we provide a quick installation using Docker Compose. If you are interested to the emulation internal working and developement we refer you to the [emulator code repository](https://github.com/Orange-OpenSource/elora).
 
 ELoRa was developed by extending the [LoRaWAN module](https://github.com/signetlabdei/lorawan "LoRaWAN ns-3 module") of the [ns-3](https://gitlab.com/nsnam/ns-3-dev "The Network Simulator, Version 3") network simulator.
 
@@ -32,13 +32,13 @@ Inside [`elora-example/`](/elora-example/) we provide an example scenario. Numer
 
 If you want to go a step further, and change the internal ns-3 libraries, you can add your own module repository in the [`build/`](/build/) directory, edit the [`Dockerfile`](/build/Dockerfile) accordingly, and run `docker compose build` from the root directory of this repository. Make sure you [init the ns-3 submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) in the [`build/`](/build/) directory.
 
-We support the developement philosophy of ns-3. Feel free to contribute by forking [the module repository](https://github.com/nondetalle/elora).
+We support the developement philosophy of ns-3. Feel free to contribute by forking [the module repository](https://github.com/Orange-OpenSource/elora).
 
 For more information on how to use the underlying LoRaWAN module refer to the [original module readme](https://github.com/signetlabdei/lorawan/blob/e8f7a21044418e92759d5c7c4bcab147cdaf05b3/README.md "LoRaWAN ns-3 module README").
 
 ## Getting help ##
 
-If you need any help, feel free to open an issue here or on the [module repository](https://github.com/nondetalle/elora).
+If you need any help, feel free to open an issue here or on the [module repository](https://github.com/Orange-OpenSource/elora).
 
 ## Cite us ##
 
