@@ -1,6 +1,6 @@
 [submodule "build/elora"]
 	path = build/elora
-	url = https://github.com/non-det-alle/elora.git
+	url = https://github.com/nondetalle/elora.git
 [submodule "build/ns-3-dev"]
 	path = build/ns-3-dev
 	url = https://gitlab.com/nsnam/ns-3-dev.git
