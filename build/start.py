@@ -4,29 +4,9 @@ from toml import load, TomlDecodeError
 from os import environ, path
 from subprocess import run, Popen, check_output, CalledProcessError
 from signal import SIGTERM, signal
-from re import search
+from re import search, match
 from sys import exit
 from time import sleep
-
-
-def get_ip_from_getent(service_name):
-    """Resolve the IP address of a service using 'getent hosts'."""
-    try:
-        # Run the 'getent hosts' command
-        result = check_output(["getent", "hosts", service_name], text=True)
-
-        # Parse the IP address using a regular expression
-        match = search(r"(\d+\.\d+\.\d+\.\d+)", result)
-        if match:
-            return match.group(1)  # Return the first IP address found
-        else:
-            raise ValueError(f"No IP address found for service '{service_name}'")
-    except CalledProcessError:
-        raise RuntimeError(
-            f"Failed to run 'getent hosts {service_name}'. Is the service name correct?"
-        )
-    except Exception as e:
-        raise RuntimeError(f"Error resolving IP address for '{service_name}': {e}")
 
 
 # Load and validate configuration
@@ -58,12 +38,34 @@ dest_addr = config["destAddr"]
 tap_name = config["tap"]
 target_name = config["run"]["target"]
 
+
+def get_ip_from_getent(service_name):
+    """Resolve the IP address of a service using 'getent hosts'."""
+    try:
+        # Run the 'getent hosts' command
+        result = check_output(["getent", "hosts", service_name], text=True)
+
+        # Parse the IP address using a regular expression
+        match = search(r"(\d+\.\d+\.\d+\.\d+)", result)
+        if match:
+            return match.group(1)  # Return the first IP address found
+        else:
+            raise ValueError(f"No IP address found for service '{service_name}'")
+    except CalledProcessError:
+        raise RuntimeError(
+            f"Failed to run 'getent hosts {service_name}'. Is the service name correct?"
+        )
+    except Exception as e:
+        raise RuntimeError(f"Error resolving IP address for '{service_name}': {e}")
+
+
 # Resolve destination DNS
-try:
-    dest_addr = get_ip_from_getent(dest_addr)
-except RuntimeError as e:
-    print(e)
-    exit(1)
+if not match(r"(\d+\.\d+\.\d+\.\d+)", dest_addr):
+    try:
+        dest_addr = get_ip_from_getent(dest_addr)
+    except RuntimeError as e:
+        print(e)
+        exit(1)
 
 # Create tap device
 try:
@@ -76,11 +78,13 @@ except CalledProcessError as e:
 
 # Create iptables rules
 try:
+    # traffic from TAP: overwrite dest IP from this to dest_addr
     run(
         ["iptables", "-t", "nat", "-A", "PREROUTING", "-i", tap_name, "-p", "udp"]
         + ["-j", "DNAT", "--to-destination", dest_addr],
         check=True,
     )
+    # traffic exiting container: map ns-3 source IPs to local ports
     run(
         ["iptables", "-t", "nat", "-A", "POSTROUTING", "-o", "eth0", "-p", "udp"]
         + ["-j", "MASQUERADE", "--to-ports", "40000-50000"],
@@ -97,6 +101,7 @@ try:
     target = [target_name]
     if "args" in config["run"] and config["run"]["args"]:
         target.append("--")
+        target.append("--tapName=" + tap_name)
         for p, v in config["run"]["args"].items():
             if isinstance(v, bool):
                 v = int(v)
